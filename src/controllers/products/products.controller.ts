@@ -9,16 +9,20 @@ import {
   Query,
   HttpCode,
   HttpStatus,
+  ParseIntPipe
 } from '@nestjs/common';
+
+import { ProductsService } from '../../services/products/products.service';
+import { CreateProductDto } from '../../dtos/products.dto';
 
 @Controller('products')
 export class ProductsController {
+  constructor(private productsService: ProductsService) {}
+
   @Get(':nuevoId')
   @HttpCode(HttpStatus.ACCEPTED)
-  newEndpoint(@Param('nuevoId') nuevoId: string) {
-    return {
-      message: `nuevo id ${nuevoId}`,
-    };
+  getProductById(@Param('nuevoId', ParseIntPipe) nuevoId: number) {
+    return this.productsService.findOne(nuevoId);
   }
 
   @Get('')
@@ -27,17 +31,13 @@ export class ProductsController {
     @Query('offset') offset: number,
     @Query('brand') brand: string,
   ) {
-    return {
-      message: `products ${limit} and ${offset} and ${brand}`,
-    };
+    return this.productsService.findAll();
   }
 
   @Post()
-  createProduct(@Body() payload: any) {
-    return {
-      message: 'Acción de crear',
-      payload,
-    };
+  createProduct(@Body() payload: CreateProductDto) {
+    this.productsService.create(payload);
+    return payload;
   }
 
   @Put(':productId')
